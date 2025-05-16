@@ -7,28 +7,26 @@ import Loader from './components/Loader/Loader';
 import ErrorMessage from './components/ErrorMessage/ErrorMessage';
 import ImageModal from "./components/ImageModal/ImageModal"; 
 import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
-
-
-// import { toast } from 'react-hot-toast';
+import { Image, UnsplashResponse, UnsplashApiImage  } from './App.types';
 
 
 const ACCESS_KEY = "faqkgSo34geXeTxFk9k4_SjWLmxa0MQsQ7_BAiG9Ta4"
 
 function App() {
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [images, setImages] = useState<Image[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string|null>(null);
+  const [query, setQuery] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [selectedImage, setSelectedImage] = useState<Image|null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
  
 
 useEffect(() => {
   localStorage.removeItem("images");
 }, []);
 
-  const fetchImages = async (searchQuery, pageNumber) => {
+  const fetchImages = async (searchQuery: string, pageNumber: number):Promise<void> => {
     setLoading(true);
     setError(null)
     try {
@@ -38,21 +36,28 @@ useEffect(() => {
       if (!response.ok) {
        throw new Error("Failed to fetch images. Try again later.");
       }
-      const data = await response.json();
-      const formatted = data.results.map((img) => ({
+      const data: UnsplashResponse=  await response.json();
+      const formatted:Image[] =  data.results.map((img: UnsplashApiImage) => ({
         id: img.id,
         src: img.urls.small,
-        alt: img.alt_description || "Unsplash image"
+        alt: img.alt_description || "Unsplash image",
+        alt_description: img.alt_description,
+        urls: img.urls,
       }));
       setImages((prev) =>
         pageNumber === 1 ? formatted : [...prev, ...formatted]);
-    } catch (err) {
-     setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("Something went wrong")
+      }
+     
     } finally {
       setLoading(false)
     }
   };
-  const handleSearchSubmit = (newQuery) => {
+  const handleSearchSubmit = (newQuery:string): void => {
     setQuery(newQuery);
     setPage(1)
     setImages([])
@@ -63,7 +68,7 @@ useEffect(() => {
     setPage(nextPage);
     fetchImages(query, nextPage);
   }
-  const openModal = (image) => {
+  const openModal = (image:Image) => {
   setSelectedImage(image);
   setIsModalOpen(true);
 };
