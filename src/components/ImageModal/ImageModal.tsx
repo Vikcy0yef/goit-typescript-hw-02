@@ -22,7 +22,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onRequestClose, image }
               <img
                   src={image.urls.regular}
                   alt={image.alt||""}
-          style={{ width: "100%", height: "auto" }}
+          style={{ width: "500px", height: "500px" }}
         />
       )}
     </ReactModal>
